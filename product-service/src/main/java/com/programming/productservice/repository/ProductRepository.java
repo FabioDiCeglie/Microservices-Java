@@ -1,4 +1,4 @@
-package com.programming.repository;
+package com.programming.productservice.repository;
 
 import org.springframework.data.mongodb.repository.MongoRepository;
 import com.programming.productservice.model.Product;
