@@ -3,7 +3,6 @@ package com.programming.productservice;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.programming.productservice.dto.ProductRequest;
-import com.programming.productservice.dto.ProductResponse;
 import com.programming.productservice.repository.ProductRepository;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
