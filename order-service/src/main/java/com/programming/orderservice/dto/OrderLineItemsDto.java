@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class OrderLineItems {
+public class OrderLineItemsDto {
     private Long id;
     private String skuCode;
     private BigDecimal price;
