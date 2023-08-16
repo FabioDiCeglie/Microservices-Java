@@ -20,6 +20,7 @@ import lombok.RequiredArgsConstructor;
 public class OrderService {
     
     private final OrderRepository orderRepository;
+    private final WebClient webClient;
 
     public void placeOrder(OrderRequest orderRequest){
         Order order = new Order();
@@ -32,7 +33,15 @@ public class OrderService {
 
         order.setOrderLineItemsList(orderLineItems);
 
-        orderRepository.save(order);
+        // call inventory server and place order if product is inStock
+        Boolean result = webClient.get().uri('http://localhost:8082/api/inventory/{}')
+                            .retrieve().bodyToMono(Boolean.class).block();
+        
+        if(result){
+            orderRepository.save(order);
+        } else {
+            throw new IllegalArgumentException('Produt is not in stock, please try again later!')
+        }
     }
 
     private OrderLineItems mapToDto(OrderLineItemsDto orderLineItems){
