@@ -11,7 +11,7 @@ public class WebClientConfig {
     @Bean
     // add load balancing client side ability
     @LoadBalanced
-    public WebClient.Builder webClient(){
+    public WebClient.Builder webClientBuilder(){
         return WebClient.builder();
     }
 }
