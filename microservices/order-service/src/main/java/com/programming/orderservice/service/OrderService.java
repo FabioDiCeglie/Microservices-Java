@@ -41,6 +41,7 @@ public class OrderService {
         .uri("http://localhost:8082/api/inventory", uriBuilder -> uriBuilder.queryParam("skuCode", skuCodes).build())
         .retrieve().bodyToMono(InventoryResponse[].class).block();
 
+        // check if each product in the orderLineItems is inStock
         boolean allProductsInStock = Arrays.stream(inventoryResponseArray).allMatch(InventoryResponse::isInStock);
         
         if(allProductsInStock){
