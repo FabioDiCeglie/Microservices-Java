@@ -11,6 +11,10 @@ import com.programming.orderservice.dto.*;
 import com.programming.orderservice.model.Order;
 import com.programming.orderservice.model.OrderLineItems;
 import com.programming.orderservice.repository.OrderRepository;
+
+import io.micrometer.observation.Observation;
+import io.micrometer.observation.ObservationRegistry;
+
 import org.springframework.web.reactive.function.client.WebClient;
 
 import lombok.RequiredArgsConstructor;
@@ -22,6 +26,7 @@ public class OrderService {
     
     private final OrderRepository orderRepository;
     private final WebClient.Builder webClientBuilder;
+     private final ObservationRegistry observationRegistry;
 
     public String placeOrder(OrderRequest orderRequest){
         Order order = new Order();
@@ -37,6 +42,9 @@ public class OrderService {
         List<String> skuCodes = order.getOrderLineItemsList().stream().map(OrderLineItems::getSkuCode).toList();
 
         // call inventory server and place order if product is inStock
+        Observation inventoryServiceObservation = Observation.createNotStarted("invetory-service-lookup", this.observationRegistry);
+        inventoryServiceObservation.lowCardinalityKeyValue("call", "inventory-service");
+        
         InventoryResponse[] inventoryResponseArray = webClientBuilder.build().get()
         .uri("http://inventory-service/api/inventory", uriBuilder -> uriBuilder.queryParam("skuCode", skuCodes).build())
         .retrieve().bodyToMono(InventoryResponse[].class).block();
