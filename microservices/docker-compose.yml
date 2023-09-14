@@ -13,9 +13,9 @@ services:
     volumes:
       - ./postgres-order:/data/postgres
     expose:
-      - "5431"
+      - '5431'
     ports:
-      - "5431:5431"
+      - '5431:5431'
     command: -p 5431
     restart: always
 
@@ -30,7 +30,7 @@ services:
     volumes:
       - ./postgres-inventory:/data/postgres
     ports:
-      - "5432:5432"
+      - '5432:5432'
     restart: always
 
   ## Mongo Docker Compose Config
@@ -39,9 +39,9 @@ services:
     image: mongo:4.4.14-rc0-focal
     restart: always
     ports:
-      - "27017:27017"
+      - '27017:27017'
     expose:
-      - "27017"
+      - '27017'
     volumes:
       - ./mongo-data:/data/db
 
@@ -60,7 +60,7 @@ services:
   keycloak:
     container_name: keycloak
     image: quay.io/keycloak/keycloak:18.0.0
-    command: [ "start-dev", "--import-realm" ]
+    command: ['start-dev', '--import-realm']
     environment:
       DB_VENDOR: MYSQL
       DB_ADDR: mysql
@@ -70,7 +70,7 @@ services:
       KEYCLOAK_ADMIN: admin
       KEYCLOAK_ADMIN_PASSWORD: admin
     ports:
-      - "8080:8080"
+      - '8080:8080'
     volumes:
       - ./realms/:/opt/keycloak/data/import/
     depends_on:
@@ -80,7 +80,7 @@ services:
     image: confluentinc/cp-zookeeper:7.0.1
     container_name: zookeeper
     ports:
-      - "2181:2181"
+      - '2181:2181'
     environment:
       ZOOKEEPER_CLIENT_PORT: 2181
       ZOOKEEPER_TICK_TIME: 2000
@@ -89,7 +89,7 @@ services:
     image: confluentinc/cp-kafka:7.0.1
     container_name: broker
     ports:
-      - "9092:9092"
+      - '9092:9092'
     depends_on:
       - zookeeper
     environment:
@@ -106,14 +106,14 @@ services:
     image: openzipkin/zipkin
     container_name: zipkin
     ports:
-      - "9411:9411"
+      - '9411:9411'
 
   ## Eureka Server
   discovery-server:
     image: microservices/discovery-server:latest
     container_name: discovery-server
     ports:
-      - "8761:8761"
+      - '8761:8761'
     environment:
       - SPRING_PROFILES_ACTIVE=docker
     depends_on:
@@ -123,9 +123,9 @@ services:
     image: microservices/api-gateway:latest
     container_name: api-gateway
     ports:
-      - "8181:8080"
+      - '8181:8080'
     expose:
-      - "8181"
+      - '8181'
     environment:
       - SPRING_PROFILES_ACTIVE=docker
       - LOGGING_LEVEL_ORG_SPRINGFRAMEWORK_SECURITY= TRACE
@@ -182,3 +182,32 @@ services:
       - broker
       - discovery-server
       - api-gateway
+
+  ## Prometheus
+  prometheus:
+    image: prom/prometheus:v2.37.1
+    container_name: prometheus
+    restart: always
+    ports:
+      - '9090:9090'
+    volumes:
+      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+    depends_on:
+      - product-service
+      - inventory-service
+      - order-service
+      - notification-service
+
+  grafana:
+    image: grafana/grafana-oss:8.5.2
+    container_name: grafana
+    restart: always
+    ports:
+      - '3000:3000'
+    links:
+      - prometheus:prometheus
+    volumes:
+      - ./grafana:/var/lib/grafana
+    environment:
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=password
